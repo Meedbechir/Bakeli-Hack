@@ -1,53 +1,39 @@
-import React, { useState } from 'react';
-import { DashboardHeader } from './DashbordHeader'; // Assurez-vous d'ajuster le chemin d'importation selon votre structure de projet
+import React, { useState, useEffect } from 'react';
+import { DashboardHeader } from './DashbordHeader';
+import { db } from '../config/firebase';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 
 export const Cours = () => {
-  const [coursData, setCoursData] = useState([
-    {
-      id: 1,
-      nom: 'Introduction à la programmation',
-      professeur: 'Kalika',
-      duree: '10 semaines',
-      niveau: 'Débutant',
-      archivé: false,
-    },
-    {
-      id: 2,
-      nom: 'Bases de données avancées',
-      professeur: 'Mahmoud Barry',
-      duree: '12 semaines',
-      niveau: 'Intermédiaire',
-      archivé: false,
-    },
-    {
-      id: 3,
-      nom: 'Développement mobile',
-      professeur: 'Abou Sow',
-      duree: '8 semaines',
-      niveau: 'Avancé',
-      archivé: false,
-    },
-    {
-      id: 4,
-      nom: 'Conception web moderne',
-      professeur: 'Alkaly Badji',
-      duree: '14 semaines',
-      niveau: 'Intermédiaire',
-      archivé: false,
-    },
-  ]);
-
+  const [coursData, setCoursData] = useState([]);
   const [selectedCours, setSelectedCours] = useState(null);
   const [isAddingCours, setIsAddingCours] = useState(false);
-
   const [newCoursData, setNewCoursData] = useState({
     nom: '',
     professeur: '',
     duree: '',
     niveau: '',
   });
-
   const [archivedCours, setArchivedCours] = useState([]);
+
+  useEffect(() => {
+    const loadCoursFromFirestore = async () => {
+      try {
+        const coursCollection = collection(db, 'cours');
+        const querySnapshot = await getDocs(coursCollection);
+        const coursData = [];
+
+        querySnapshot.forEach((doc) => {
+          coursData.push({ id: doc.id, ...doc.data() });
+        });
+
+        setCoursData(coursData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadCoursFromFirestore();
+  }, []);
 
   const openAddCoursForm = () => {
     setIsAddingCours(true);
@@ -71,18 +57,23 @@ export const Cours = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Générez un nouvel ID unique pour le cours ajouté
-    const newCours = {
-      id: coursData.length + 1,
-      ...newCoursData,
-      archivé: false,
-    };
-    // Ajoutez le nouveau cours à la liste
-    setCoursData([...coursData, newCours]);
-    // Fermez le formulaire d'ajout
-    closeAddCoursForm();
+
+    try {
+      const docRef = await addDoc(collection(db, 'cours'), newCoursData);
+      const addedCours = {
+        id: docRef.id,
+        ...newCoursData,
+        archivé: false,
+      };
+
+      setCoursData([...coursData, addedCours]);
+
+      closeAddCoursForm();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleVoirDetails = (coursId) => {
@@ -90,37 +81,46 @@ export const Cours = () => {
     setSelectedCours(cours);
   };
 
-  const handleArchiverCours = (coursId) => {
-    // Trouvez le cours à archiver
+  const handleArchiverCours = async (coursId) => {
     const coursToArchive = coursData.find((c) => c.id === coursId);
 
     if (coursToArchive) {
-      // Supprimez le cours de la liste principale
-      const updatedCours = coursData.filter((c) => c.id !== coursId);
-      setCoursData(updatedCours);
+      try {
+        const coursDocRef = collection(db, 'cours', coursId);
+        await coursDocRef.update({ archivé: true });
 
-      // Ajoutez le cours à la liste archivée
-      setArchivedCours([...archivedCours, coursToArchive]);
+        const updatedCours = coursData.filter((c) => c.id !== coursId);
+        setCoursData(updatedCours);
+
+        setArchivedCours([...archivedCours, coursToArchive]);
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 
-  const handleDesarchiverCours = (coursId) => {
-    // Trouvez le cours à désarchiver
+  const handleDesarchiverCours = async (coursId) => {
     const coursToUnarchive = archivedCours.find((c) => c.id === coursId);
 
     if (coursToUnarchive) {
-      // Supprimez le cours de la liste archivée
-      const updatedArchivedCours = archivedCours.filter((c) => c.id !== coursId);
-      setArchivedCours(updatedArchivedCours);
+      try {
 
-      // Réinsérez le cours dans la liste principale
-      setCoursData([...coursData, coursToUnarchive]);
+        const coursDocRef = collection(db, 'cours', coursId);
+        await coursDocRef.update({ archivé: false });
+
+        const updatedArchivedCours = archivedCours.filter((c) => c.id !== coursId);
+        setArchivedCours(updatedArchivedCours);
+
+        setCoursData([...coursData, coursToUnarchive]);
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 
   return (
     <div>
-      <DashboardHeader /> {/* Inclusion du composant DashboardHeader */}
+      <DashboardHeader />
       <div className="container-fluid mt-4">
         <h2 className="text-center">Liste des Cours</h2>
         <div className="row mt-5">
@@ -136,10 +136,10 @@ export const Cours = () => {
                     Voir détails
                   </button>
                   <button
-                    className="btn btn-danger ms-3 btnarc"
+                    className="btn btn-info ms-3 btnarc"
                     onClick={() => handleArchiverCours(cours.id)}
                   >
-                    Archiver le cours
+                    Archiver
                   </button>
                 </div>
               </div>

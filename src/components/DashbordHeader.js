@@ -57,7 +57,7 @@ export const DashboardHeader = () => {
               <Link className="nav-link text-primary fs-4" to="/apprenants">Apprenants</Link>
             </li>
             <li className="nav-item">
-              <button className="btn btn-danger mt-2 ms-5" onClick={handleSignOut}>Déconnexion</button>
+              <button className="btn btn-danger mt-2 ms-3" onClick={handleSignOut}>Déconnexion</button>
             </li>
           </ul>
         </div>

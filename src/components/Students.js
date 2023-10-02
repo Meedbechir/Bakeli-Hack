@@ -50,7 +50,6 @@ export const Students = () => {
       matiere: '',
       email: '',
       telephone: '',
-      adresse: '',
       mdp: '',
     });
   };
@@ -126,10 +125,10 @@ export const Students = () => {
                     Voir détails
                   </button>
                   <button
-                    className="btn btn-danger ms-3"
+                    className="btn btn-info ms-3"
                     onClick={() => handleArchiverEtudiant(student.id)}
                   >
-                    Archiver l'étudiant
+                    Archiver
                   </button>
                 </div>
               </div>
@@ -213,7 +212,7 @@ export const Students = () => {
                         name="prenom"
                         value={newStudentData.prenom}
                         onChange={handleInputChange}
-                      />
+                      autoComplete='off'/>
                     </div>
                     <div className="mb-3">
                       <label htmlFor="nom" className="form-label">
@@ -226,7 +225,7 @@ export const Students = () => {
                         name="nom"
                         value={newStudentData.nom}
                         onChange={handleInputChange}
-                      />
+                        autoComplete='off' />
                     </div>
                     <div className="mb-3">
                       <label htmlFor="nom" className="form-label">
@@ -239,7 +238,7 @@ export const Students = () => {
                         name="matiere"
                         value={newStudentData.matiere}
                         onChange={handleInputChange}
-                      />
+                        autoComplete='off'/>
                     </div>
                     <div className="mb-3">
                       <label htmlFor="email" className="form-label">
@@ -252,7 +251,7 @@ export const Students = () => {
                         name="email"
                         value={newStudentData.email}
                         onChange={handleInputChange}
-                      />
+                        autoComplete='off'/>
                     </div>
                     <div className="mb-3">
                       <label htmlFor="telephone" className="form-label">
@@ -265,7 +264,7 @@ export const Students = () => {
                         name="telephone"
                         value={newStudentData.telephone}
                         onChange={handleInputChange}
-                      />
+                        autoComplete='off'/>
                     </div>
                     <div className="mb-3">
                       <label htmlFor="mdp" className="form-label">
@@ -278,7 +277,7 @@ export const Students = () => {
                         name="mdp"
                         value={newStudentData.mdp}
                         onChange={handleInputChange}
-                      />
+                        autoComplete='off' />
                     </div>
                     <button type="submit" className="btn btn-primary">
                       Ajouter

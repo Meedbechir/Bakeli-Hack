@@ -1,49 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from './DashbordHeader';
+import { db } from '../config/firebase';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 
 export const Teachers = () => {
-  const [teachers, setTeachers] = useState([
-    {
-      id: 1,
-      nom: 'Kalika',
-      matiere: 'Programmation / Full-stack',
-      email: 'kalika@bk.com',
-      telephone: '123-456-7890',
-      adresse: 'Dakar',
-      archivé: false,
-    },
-    {
-      id: 2,
-      nom: 'Mahmoud Barry',
-      matiere: 'Programmation / Back-End',
-      email: 'mahmoud@bk.com',
-      telephone: '987-654-3210',
-      adresse: 'Dakar',
-      archivé: false,
-    },
-    {
-      id: 3,
-      nom: 'Abou Sow',
-      matiere: 'Programmation / Mobile',
-      email: 'abou@bk.com',
-      telephone: '555-555-5555',
-      adresse: 'Dakar',
-      archivé: false,
-    },
-    {
-      id: 4,
-      nom: 'Alkaly Badji',
-      matiere: 'Programmation / Front-End',
-      email: 'alkaly@bk.com',
-      telephone: '777-888-9999',
-      adresse: 'Dakar',
-      archivé: false,
-    },
-  ]);
-
+  const [teachers, setTeachers] = useState([]);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [isAddingTeacher, setIsAddingTeacher] = useState(false);
-
   const [newTeacherData, setNewTeacherData] = useState({
     nom: '',
     matiere: '',
@@ -51,8 +14,27 @@ export const Teachers = () => {
     telephone: '',
     adresse: '',
   });
-
   const [archivedTeachers, setArchivedTeachers] = useState([]);
+
+  useEffect(() => {
+    const loadTeachersFromFirestore = async () => {
+      try {
+        const teachersCollection = collection(db, 'teachers');
+        const querySnapshot = await getDocs(teachersCollection);
+        const teacherData = [];
+
+        querySnapshot.forEach((doc) => {
+          teacherData.push({ id: doc.id, ...doc.data() });
+        });
+
+        setTeachers(teacherData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    loadTeachersFromFirestore();
+  }, []);
 
   const openAddTeacherForm = () => {
     setIsAddingTeacher(true);
@@ -77,18 +59,23 @@ export const Teachers = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Générez un nouvel ID unique pour le professeur ajouté
-    const newTeacher = {
-      id: teachers.length + 1,
-      ...newTeacherData,
-      archivé: false,
-    };
-    // Ajoutez le nouveau professeur à la liste
-    setTeachers([...teachers, newTeacher]);
-    // Fermez le formulaire d'ajout
-    closeAddTeacherForm();
+
+    try {
+      const docRef = await addDoc(collection(db, 'teachers'), newTeacherData);
+      const addedTeacher = {
+        id: docRef.id,
+        ...newTeacherData,
+        archivé: false,
+      };
+
+      setTeachers([...teachers, addedTeacher]);
+
+      closeAddTeacherForm();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleVoirDetails = (teacherId) => {
@@ -97,29 +84,21 @@ export const Teachers = () => {
   };
 
   const handleArchiverProfesseur = (teacherId) => {
-    // Trouvez le professeur à archiver
     const teacherToArchive = teachers.find((t) => t.id === teacherId);
 
     if (teacherToArchive) {
-      // Supprimez le professeur de la liste principale
       const updatedTeachers = teachers.filter((t) => t.id !== teacherId);
       setTeachers(updatedTeachers);
-
-      // Ajoutez le professeur à la liste archivée
       setArchivedTeachers([...archivedTeachers, teacherToArchive]);
     }
   };
 
   const handleDesarchiverProfesseur = (teacherId) => {
-    // Trouvez le professeur à désarchiver
     const teacherToUnarchive = archivedTeachers.find((t) => t.id === teacherId);
 
     if (teacherToUnarchive) {
-      // Supprimez le professeur de la liste archivée
       const updatedArchivedTeachers = archivedTeachers.filter((t) => t.id !== teacherId);
       setArchivedTeachers(updatedArchivedTeachers);
-
-      // Réinsérez le professeur dans la liste principale
       setTeachers([...teachers, teacherToUnarchive]);
     }
   };
@@ -143,10 +122,10 @@ export const Teachers = () => {
                     Voir détails
                   </button>
                   <button
-                    className="btn btn-danger ms-3"
+                    className="btn btn-info ms-3"
                     onClick={() => handleArchiverProfesseur(teacher.id)}
                   >
-                    Archiver le professeur
+                    Archiver
                   </button>
                 </div>
               </div>
