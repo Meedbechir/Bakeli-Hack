@@ -1,0 +1,24 @@
+import './App.css';
+import { Dashboard } from './components/Dashoard'; 
+// import { Cours } from './components/Cours';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+// import { Login } from './components/Login'; 
+// import { Register } from './components/Register'; 
+
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <Dashboard />
+        {/* <Cours /> */}
+        <Routes>
+          {/* <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} /> */}
+          {/* <Route path="/cours" element={<Cours />} /> */}
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
