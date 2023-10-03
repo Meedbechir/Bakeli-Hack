@@ -18,7 +18,6 @@ export const DashboardHeader = () => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      // Rediriger l'utilisateur vers la page de connexion (par exemple '/login')
       window.location.href = '/login';
     } catch (error) {
       console.error('Erreur lors de la déconnexion :', error);

@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { getDocs, query, where, collection } from 'firebase/firestore';
+import { auth, db } from '../config/firebase';
 
-export const Login = ({setIsAuthenticated}) => {
+export const Login = ({ setIsAuthenticated }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [resetEmail, setResetEmail] = useState('');
@@ -30,10 +31,24 @@ export const Login = ({setIsAuthenticated}) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
 
-      setIsAuthenticated(true); 
+      const usersCollection = collection(db, 'users');
+      const q = query(usersCollection, where('email', '==', email));
+      const querySnapshot = await getDocs(q);
 
-      // Rediriger l'utilisateur vers le tableau de bord
-      navigate('/dashboard');
+      if (!querySnapshot.empty) {
+        querySnapshot.forEach((doc) => {
+          const userData = doc.data();
+          const userRole = userData.role;
+
+          if (userRole === 'admin') {
+            setIsAuthenticated(true);
+            navigate('/dashboard');
+          } else if (userRole === 'etudiant') {
+            setIsAuthenticated(true);
+            navigate('/studentCours');
+          }
+        });
+      }
     } catch (error) {
       alert('Échec de la connexion. Veuillez vérifier vos informations.');
       console.error(error);
@@ -55,7 +70,7 @@ export const Login = ({setIsAuthenticated}) => {
   };
 
   return (
-    <div className='container-fluid div-one'>
+    <div className="container-fluid div-one">
       <div className="row align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
         <div className="col-12 col-md-8 col-lg-6">
           <div className="border p-4 div-form" style={{ backgroundColor: 'white' }}>
@@ -65,7 +80,7 @@ export const Login = ({setIsAuthenticated}) => {
                 <input
                   type="email"
                   className="form-control"
-                  placeholder='Email'
+                  placeholder="Email"
                   onChange={handleEmailChange}
                   value={email}
                   required
@@ -75,22 +90,24 @@ export const Login = ({setIsAuthenticated}) => {
                 <input
                   type="password"
                   className="form-control"
-                  placeholder='Mot de Passe'
+                  placeholder="Mot de Passe"
                   onChange={handlePasswordChange}
                   value={password}
                   required
                 />
               </div>
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <button className='btn btn-primary btn-block'>Se Connecter</button>
+                <button className="btn btn-primary btn-block">Se Connecter</button>
                 <button
-                  className='btn btn-danger btn-block mt-2'
+                  className="btn btn-danger btn-block mt-2"
                   onClick={() => setShowResetModal(true)}
                 >
                   Mot de passe oublié ?
                 </button>
               </div>
-              <p className='text-center'>Vous n'avez pas de compte ? <Link to="/register">Inscrivez-vous</Link></p>
+              <p className="text-center">
+                Vous n'avez pas de compte ? <Link to="/register">Inscrivez-vous</Link>
+              </p>
             </form>
           </div>
         </div>

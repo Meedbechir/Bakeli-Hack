@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; 
+import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { addDoc, collection } from 'firebase/firestore'; 
+import { addDoc, collection } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 
 export const Register = ({ setIsAuthenticated }) => {
@@ -49,7 +49,8 @@ export const Register = ({ setIsAuthenticated }) => {
         fullName: fullName,
         phoneNumber: phoneNumber,
         email: email,
-        userId: user.uid, 
+        userId: user.uid,
+        role: 'admin',
       });
 
       setEmail('');
@@ -58,9 +59,6 @@ export const Register = ({ setIsAuthenticated }) => {
       setFullName('');
       setPhoneNumber('');
 
-      // Mettre à jour l'état isAuthenticated après l'inscription
-
-      
       setIsAuthenticated(true);
 
       navigate('/login');
@@ -76,7 +74,6 @@ export const Register = ({ setIsAuthenticated }) => {
           <div className="border p-4 rounded shadow-lg" style={{ backgroundColor: 'white' }}>
             <h2 className="text-center mb-4">Inscription</h2>
             <form onSubmit={handleRegistration}>
-  
               <div className="mb-3">
                 <input
                   type="email"

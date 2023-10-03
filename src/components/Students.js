@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from './DashbordHeader';
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs, where, query } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 
 export const Students = () => {
   const [students, setStudents] = useState([]);
@@ -13,16 +15,19 @@ export const Students = () => {
     matiere: '',
     email: '',
     telephone: '',
-    adresse: '',
     mdp: '',
+    role: 'etudiant',
   });
   const [archivedStudents, setArchivedStudents] = useState([]);
 
   useEffect(() => {
     const loadStudentsFromFirestore = async () => {
       try {
-        const studentsCollection = collection(db, 'students');
-        const querySnapshot = await getDocs(studentsCollection);
+        // Créez une requête pour récupérer uniquement les étudiants ayant le rôle "etudiant"
+        const usersCollection = collection(db, 'users');
+        const q = query(usersCollection, where('role', '==', 'etudiant'));
+        const querySnapshot = await getDocs(q);
+
         const studentData = [];
 
         querySnapshot.forEach((doc) => {
@@ -31,7 +36,7 @@ export const Students = () => {
 
         setStudents(studentData);
       } catch (error) {
-        console.error( error);
+        console.error(error);
       }
     };
 
@@ -51,6 +56,7 @@ export const Students = () => {
       email: '',
       telephone: '',
       mdp: '',
+      role: 'etudiant',
     });
   };
 
@@ -66,11 +72,25 @@ export const Students = () => {
     e.preventDefault();
 
     try {
-      const docRef = await addDoc(collection(db, 'students'), newStudentData);
+      const auth = getAuth();
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        newStudentData.email,
+        newStudentData.mdp
+      );
+
+      const userId = userCredential.user.uid;
+
+      const { mdp, ...studentDataWithoutPassword } = newStudentData;
+
+      const docRef = await addDoc(collection(db, 'users'), {
+        ...studentDataWithoutPassword,
+        uid: userId,
+      });
+
       const addedStudent = {
         id: docRef.id,
         ...newStudentData,
-        archivé: false,
       };
 
       setStudents([...students, addedStudent]);
@@ -108,7 +128,7 @@ export const Students = () => {
 
   return (
     <div>
-      <DashboardHeader />
+     <DashboardHeader />
       <div className="container-fluid mt-4">
         <h2 className="text-center">Liste des Étudiants</h2>
         <div className="row mt-5">
@@ -212,7 +232,7 @@ export const Students = () => {
                         name="prenom"
                         value={newStudentData.prenom}
                         onChange={handleInputChange}
-                      autoComplete='off'/>
+                        autoComplete='off'/>
                     </div>
                     <div className="mb-3">
                       <label htmlFor="nom" className="form-label">
