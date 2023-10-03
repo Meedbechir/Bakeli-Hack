@@ -47,13 +47,13 @@ export const DashboardHeader = () => {
         <div className={`collapse navbar-collapse ${isMobileNavOpen ? 'show' : ''}`} id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link className="nav-link text-primary fs-4" to="/cours">Cours</Link>
+              <Link className="nav-link  text-dark fs-4" to="/cours">Cours</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link text-primary fs-4" to="/professeurs">Professeurs</Link>
+              <Link className="nav-link  text-dark fs-4" to="/professeurs">Professeurs</Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link text-primary fs-4" to="/apprenants">Apprenants</Link>
+              <Link className="nav-link  text-dark fs-4" to="/apprenants">Apprenants</Link>
             </li>
             <li className="nav-item">
               <button className="btn btn-danger mt-2 ms-3" onClick={handleSignOut}>Déconnexion</button>

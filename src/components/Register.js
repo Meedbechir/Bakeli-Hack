@@ -17,7 +17,7 @@ export const Register = ({ setIsAuthenticated }) => {
     setEmail(e.target.value);
   };
 
-  const handlePasswordChange = (e) => {
+  const handlePasswordChange = (e) => { 
     setPassword(e.target.value);
   };
 
@@ -102,6 +102,7 @@ export const Register = ({ setIsAuthenticated }) => {
                   placeholder='Saisissez votre numéro de téléphone'
                   required
                   autoComplete='off'
+
                 />
               </div>
               <div className="mb-3">
@@ -125,7 +126,7 @@ export const Register = ({ setIsAuthenticated }) => {
                 />
               </div>
               <div className="text-center mb-4">
-                <button className='btn btn-primary'>S'Inscrireeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</button>
+                <button className='btn btn-primary'>S'Inscrire</button>
               </div>
               <p className="text-center">Vous avez un compte ? <Link to="/login">Connectez-vous</Link></p>
             </form>

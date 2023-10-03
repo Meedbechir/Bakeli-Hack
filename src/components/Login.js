@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signInWithPopup, FacebookAuthProvider } from 'firebase/auth';
-import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { getDocs, query, where, collection } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 
@@ -69,38 +69,6 @@ export const Login = ({ setIsAuthenticated }) => {
     }
   };
 
-  const handleFacebookLogin = async () => {
-    const provider = new FacebookAuthProvider();
-
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      const usersCollection = collection(db, 'users');
-      const q = query(usersCollection, where('email', '==', user.email));
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        querySnapshot.forEach((doc) => {
-          const userData = doc.data();
-          const userRole = userData.role;
-
-          if (userRole === 'etudiant') {
-            setIsAuthenticated(true);
-            navigate('/studentCours');
-          } else {
-            alert('Vous n\'avez pas le rôle d\'étudiant pour vous connecter avec Facebook.');
-          }
-        });
-      } else {
-      
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Échec de la connexion avec Facebook. Veuillez réessayer.');
-    }
-  };
-
   return (
     <div className="container-fluid div-one">
       <div className="row align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
@@ -137,12 +105,6 @@ export const Login = ({ setIsAuthenticated }) => {
                   Mot de passe oublié ?
                 </button>
               </div>
-              <button
-                className="btn btn-primary"
-                onClick={handleFacebookLogin}
-              >
-                Connexion avec Facebook
-              </button>
               <p className="text-center">
                 Vous n'avez pas de compte ? <Link to="/register">Inscrivez-vous</Link>
               </p>
@@ -152,51 +114,51 @@ export const Login = ({ setIsAuthenticated }) => {
       </div>
 
       {showResetModal && (
-      <div className="modal" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Réinitialiser le Mot de Passe</h5>
-              <button
-                type="button"
-                className="close"
-                data-dismiss="modal"
-                aria-label="Close"
-                onClick={() => setShowResetModal(false)}
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={handleResetPassword}>
-                <div className="form-group">
-                  <label htmlFor="resetEmail">Adresse E-mail</label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="resetEmail"
-                    placeholder="Saisissez votre adresse e-mail"
-                    onChange={handleResetEmailChange}
-                    value={resetEmail}
-                    required
-                  />
-                </div>
-                <div className="modal-footer">
-                  <button type="submit" className="btn btn-primary">Envoyer</button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowResetModal(false)}
-                  >
-                    Annuler
-                  </button>
-                </div>
-              </form>
+        <div className="modal" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Réinitialiser le Mot de Passe</h5>
+                <button
+                  type="button"
+                  className="close"
+                  data-dismiss="modal"
+                  aria-label="Close"
+                  onClick={() => setShowResetModal(false)}
+                >
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <form onSubmit={handleResetPassword}>
+                  <div className="form-group">
+                    <label htmlFor="resetEmail">Adresse E-mail</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="resetEmail"
+                      placeholder="Saisissez votre adresse e-mail"
+                      onChange={handleResetEmailChange}
+                      value={resetEmail}
+                      required
+                    />
+                  </div>
+                  <div className="modal-footer">
+                    <button type="submit" className="btn btn-primary">Envoyer</button>
+                    <button
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setShowResetModal(false)}
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </div>
   );
 };

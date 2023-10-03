@@ -23,7 +23,6 @@ export const Students = () => {
   useEffect(() => {
     const loadStudentsFromFirestore = async () => {
       try {
-        // Créez une requête pour récupérer uniquement les étudiants ayant le rôle "etudiant"
         const usersCollection = collection(db, 'users');
         const q = query(usersCollection, where('role', '==', 'etudiant'));
         const querySnapshot = await getDocs(q);
