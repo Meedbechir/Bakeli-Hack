@@ -125,7 +125,7 @@ export const Register = ({ setIsAuthenticated }) => {
                 />
               </div>
               <div className="text-center mb-4">
-                <button className='btn btn-primary'>S'Inscrire</button>
+                <button className='btn btn-primary'>S'Inscrireeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee</button>
               </div>
               <p className="text-center">Vous avez un compte ? <Link to="/login">Connectez-vous</Link></p>
             </form>
