@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from './DashbordHeader';
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 export const Cours = () => {
   const [coursData, setCoursData] = useState([]);
   const [selectedCours, setSelectedCours] = useState(null);
   const [isAddingCours, setIsAddingCours] = useState(false);
+  const [isEditingCours, setIsEditingCours] = useState(false);
   const [newCoursData, setNewCoursData] = useState({
+    nom: '',
+    professeur: '',
+    duree: '',
+    niveau: '',
+  });
+  const [editedCoursData, setEditedCoursData] = useState({
+    id: '',
     nom: '',
     professeur: '',
     duree: '',
@@ -86,8 +94,8 @@ export const Cours = () => {
 
     if (coursToArchive) {
       try {
-        const coursDocRef = collection(db, 'cours', coursId);
-        await coursDocRef.update({ archivé: true });
+        const coursDocRef = doc(db, 'cours', coursId);
+        await updateDoc(coursDocRef, { archivé: true });
 
         const updatedCours = coursData.filter((c) => c.id !== coursId);
         setCoursData(updatedCours);
@@ -104,9 +112,8 @@ export const Cours = () => {
 
     if (coursToUnarchive) {
       try {
-
-        const coursDocRef = collection(db, 'cours', coursId);
-        await coursDocRef.update({ archivé: false });
+        const coursDocRef = doc(db, 'cours', coursId);
+        await updateDoc(coursDocRef, { archivé: false });
 
         const updatedArchivedCours = archivedCours.filter((c) => c.id !== coursId);
         setArchivedCours(updatedArchivedCours);
@@ -115,6 +122,42 @@ export const Cours = () => {
       } catch (error) {
         console.error(error);
       }
+    }
+  };
+
+  const handleEditCours = (cours) => {
+    setEditedCoursData(cours);
+    setIsEditingCours(true);
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditedCoursData({
+      ...editedCoursData,
+      [name]: value,
+    });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const coursDocRef = doc(db, 'cours', editedCoursData.id);
+      await updateDoc(coursDocRef, {
+        nom: editedCoursData.nom,
+        professeur: editedCoursData.professeur,
+        duree: editedCoursData.duree,
+        niveau: editedCoursData.niveau,
+      });
+
+      const updatedCoursData = coursData.map((c) =>
+        c.id === editedCoursData.id ? editedCoursData : c
+      );
+
+      setCoursData(updatedCoursData);
+      setIsEditingCours(false);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -140,6 +183,12 @@ export const Cours = () => {
                     onClick={() => handleArchiverCours(cours.id)}
                   >
                     Archiver
+                  </button>
+                  <button
+                    className="btn btn-success ms-3"
+                    onClick={() => handleEditCours(cours)}
+                  >
+                    Modifier
                   </button>
                 </div>
               </div>
@@ -167,7 +216,12 @@ export const Cours = () => {
         </div>
 
         {selectedCours && (
-          <div className="modal custom-modal fade show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+          <div
+            className="modal custom-modal fade show"
+            tabIndex="-1"
+            role="dialog"
+            style={{ display: 'block' }}
+          >
             <div className="modal-dialog custom-modal-dialog" role="document">
               <div className="modal-content">
                 <div className="modal-header custom-modal-header">
@@ -183,10 +237,18 @@ export const Cours = () => {
                   </button>
                 </div>
                 <div className="modal-body custom-modal-body">
-                  <p><strong>Nom du cours :</strong> {selectedCours.nom}</p>
-                  <p><strong>Professeur :</strong> {selectedCours.professeur}</p>
-                  <p><strong>Durée :</strong> {selectedCours.duree}</p>
-                  <p><strong>Niveau :</strong> {selectedCours.niveau}</p>
+                  <p>
+                    <strong>Nom du cours :</strong> {selectedCours.nom}
+                  </p>
+                  <p>
+                    <strong>Professeur :</strong> {selectedCours.professeur}
+                  </p>
+                  <p>
+                    <strong>Durée :</strong> {selectedCours.duree}
+                  </p>
+                  <p>
+                    <strong>Niveau :</strong> {selectedCours.niveau}
+                  </p>
                 </div>
               </div>
             </div>
@@ -194,7 +256,12 @@ export const Cours = () => {
         )}
 
         {isAddingCours && (
-          <div className="modal custom-modal fade show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+          <div
+            className="modal custom-modal fade show"
+            tabIndex="-1"
+            role="dialog"
+            style={{ display: 'block' }}
+          >
             <div className="modal-dialog custom-modal-dialog" role="document">
               <div className="modal-content">
                 <div className="modal-header custom-modal-header">
@@ -274,6 +341,101 @@ export const Cours = () => {
                     className="btn btn-secondary"
                     data-dismiss="modal"
                     onClick={closeAddCoursForm}
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isEditingCours && (
+          <div
+            className="modal custom-modal fade show"
+            tabIndex="-1"
+            role="dialog"
+            style={{ display: 'block' }}
+          >
+            <div className="modal-dialog custom-modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header custom-modal-header">
+                  <h5 className="modal-title custom-modal-title">Modifier le cours</h5>
+                  <button
+                    type="button"
+                    className="close custom-modal-close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                    onClick={() => setIsEditingCours(false)}
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body custom-modal-body">
+                  <form onSubmit={handleEditSubmit}>
+                    <div className="mb-3">
+                      <label htmlFor="nom" className="form-label">
+                        Nom du cours
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="nom"
+                        name="nom"
+                        value={editedCoursData.nom}
+                        onChange={handleEditInputChange}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="professeur" className="form-label">
+                        Professeur
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="professeur"
+                        name="professeur"
+                        value={editedCoursData.professeur}
+                        onChange={handleEditInputChange}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="duree" className="form-label">
+                        Durée
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="duree"
+                        name="duree"
+                        value={editedCoursData.duree}
+                        onChange={handleEditInputChange}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="niveau" className="form-label">
+                        Niveau
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="niveau"
+                        name="niveau"
+                        value={editedCoursData.niveau}
+                        onChange={handleEditInputChange}
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-primary">
+                      Enregistrer
+                    </button>
+                  </form>
+                </div>
+                <div className="modal-footer custom-modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-dismiss="modal"
+                    onClick={() => setIsEditingCours(false)}
                   >
                     Annuler
                   </button>

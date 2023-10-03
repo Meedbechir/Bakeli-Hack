@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DashboardHeader } from './DashbordHeader';
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc } from 'firebase/firestore';
 
 export const Teachers = () => {
   const [teachers, setTeachers] = useState([]);
@@ -15,6 +15,16 @@ export const Teachers = () => {
     adresse: '',
   });
   const [archivedTeachers, setArchivedTeachers] = useState([]);
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTeacherData, setEditedTeacherData] = useState({
+    nom: '',
+    matiere: '',
+    email: '',
+    telephone: '',
+    adresse: '',
+  });
+  const [editingTeacherId, setEditingTeacherId] = useState(null);
 
   useEffect(() => {
     const loadTeachersFromFirestore = async () => {
@@ -103,6 +113,46 @@ export const Teachers = () => {
     }
   };
 
+  const openEditTeacherModal = (teacherId) => {
+    setEditingTeacherId(teacherId);
+
+    // Pré-remplissez les champs avec les données du professeur sélectionné si nécessaire.
+    const teacher = teachers.find((t) => t.id === teacherId);
+    if (teacher) {
+      setEditedTeacherData({
+        nom: teacher.nom,
+        matiere: teacher.matiere,
+        email: teacher.email,
+        telephone: teacher.telephone,
+        adresse: teacher.adresse,
+      });
+    }
+
+    setIsEditing(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (editingTeacherId) {
+        // Mettez à jour les données du professeur dans Firestore
+        const teacherRef = doc(db, 'teachers', editingTeacherId);
+        await updateDoc(teacherRef, editedTeacherData);
+
+        // Mettez à jour l'état local du professeur
+        const updatedTeachers = teachers.map((teacher) =>
+          teacher.id === editingTeacherId ? { ...teacher, ...editedTeacherData } : teacher
+        );
+
+        setTeachers(updatedTeachers);
+        setIsEditing(false); // Fermez le modal de modification
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div>
       <DashboardHeader />
@@ -126,6 +176,12 @@ export const Teachers = () => {
                     onClick={() => handleArchiverProfesseur(teacher.id)}
                   >
                     Archiver
+                  </button>
+                  <button
+                    className="btn btn-success ms-3"
+                    onClick={() => openEditTeacherModal(teacher.id)}
+                  >
+                    Modifier
                   </button>
                 </div>
               </div>
@@ -275,6 +331,109 @@ export const Teachers = () => {
                     className="btn btn-secondary"
                     data-dismiss="modal"
                     onClick={closeAddTeacherForm}
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isEditing && (
+          <div className="modal fade show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Modifier le professeur</h5>
+                  <button
+                    type="button"
+                    className="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <form onSubmit={handleEditSubmit}>
+                    <div className="mb-3">
+                      <label htmlFor="nom" className="form-label">
+                        Nom
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="nom"
+                        name="nom"
+                        value={editedTeacherData.nom}
+                        onChange={(e) => setEditedTeacherData({ ...editedTeacherData, nom: e.target.value })}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="matiere" className="form-label">
+                        Matière
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="matiere"
+                        name="matiere"
+                        value={editedTeacherData.matiere}
+                        onChange={(e) => setEditedTeacherData({ ...editedTeacherData, matiere: e.target.value })}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="email" className="form-label">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        id="email"
+                        name="email"
+                        value={editedTeacherData.email}
+                        onChange={(e) => setEditedTeacherData({ ...editedTeacherData, email: e.target.value })}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="telephone" className="form-label">
+                        Téléphone
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="telephone"
+                        name="telephone"
+                        value={editedTeacherData.telephone}
+                        onChange={(e) => setEditedTeacherData({ ...editedTeacherData, telephone: e.target.value })}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="adresse" className="form-label">
+                        Adresse
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="adresse"
+                        name="adresse"
+                        value={editedTeacherData.adresse}
+                        onChange={(e) => setEditedTeacherData({ ...editedTeacherData, adresse: e.target.value })}
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-primary">
+                      Enregistrer
+                    </button>
+                  </form>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-dismiss="modal"
+                    onClick={() => setIsEditing(false)}
                   >
                     Annuler
                   </button>

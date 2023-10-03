@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { DashboardHeader } from './DashbordHeader';
+import { DashboardHeader } from './DashbordHeader'
 import { db } from '../config/firebase';
-import { collection, addDoc, getDocs, where, query } from 'firebase/firestore';
+import { collection, addDoc, getDocs, where, query, doc, updateDoc } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
 
@@ -18,6 +18,38 @@ export const Students = () => {
     mdp: '',
     role: 'etudiant',
   });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedStudentData, setEditedStudentData] = useState({
+    prenom: '',
+    nom: '',
+    matiere: '',
+    email: '',
+    telephone: '',
+    mdp: '',
+    role: 'etudiant',
+  });
+  const [editingStudentId, setEditingStudentId] = useState(null);
+
+  const openEditStudentModal = (studentId) => {
+    setEditingStudentId(studentId);
+
+    // Pré-remplissez les champs avec les données de l'étudiant sélectionné si nécessaire.
+    const student = students.find((s) => s.id === studentId);
+    if (student) {
+      setEditedStudentData({
+        prenom: student.prenom,
+        nom: student.nom,
+        matiere: student.matiere,
+        email: student.email,
+        telephone: student.telephone,
+        mdp: '', // Vous pouvez choisir de vider le champ du mot de passe ou non ici
+      });
+    }
+
+    setIsEditing(true);
+  };
+
   const [archivedStudents, setArchivedStudents] = useState([]);
 
   useEffect(() => {
@@ -61,8 +93,8 @@ export const Students = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewStudentData({
-      ...newStudentData,
+    setEditedStudentData({
+      ...editedStudentData,
       [name]: value,
     });
   };
@@ -100,6 +132,28 @@ export const Students = () => {
     }
   };
 
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      if (editingStudentId) {
+        // Mettez à jour les données de l'étudiant dans Firestore
+        const studentRef = doc(db, 'users', editingStudentId);
+        await updateDoc(studentRef, editedStudentData);
+
+        // Mettez à jour l'état local de l'étudiant
+        const updatedStudents = students.map((student) =>
+          student.id === editingStudentId ? { ...student, ...editedStudentData } : student
+        );
+
+        setStudents(updatedStudents);
+        setIsEditing(false); // Fermez le modal de modification
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleVoirDetails = (studentId) => {
     const student = students.find((s) => s.id === studentId);
     setSelectedStudent(student);
@@ -127,7 +181,7 @@ export const Students = () => {
 
   return (
     <div>
-     <DashboardHeader />
+      <DashboardHeader />
       <div className="container-fluid mt-4">
         <h2 className="text-center">Liste des Étudiants</h2>
         <div className="row mt-5">
@@ -135,7 +189,9 @@ export const Students = () => {
             <div className="col-md-6 mx-auto" key={student.id}>
               <div className="card custom-card mb-5 mx-auto p-3">
                 <div className="card-body">
-                  <h3 className="card-title">{student.prenom} {student.nom}</h3>
+                  <h3 className="card-title">
+                    {student.prenom} {student.nom}
+                  </h3>
                   <p>Matière étudiée : {student.matiere}</p>
                   <button
                     className="btn btn-outline-primary"
@@ -149,6 +205,12 @@ export const Students = () => {
                   >
                     Archiver
                   </button>
+                  <button
+        className="btn btn-success ms-3" // Ajoutez ici la classe pour le bouton Modifier
+        onClick={() => openEditStudentModal(student.id)} // Ouvrir le modal de modification
+      >
+        Modifier
+      </button>
                 </div>
               </div>
             </div>
@@ -161,7 +223,9 @@ export const Students = () => {
             <div className="col-md-6 mx-auto" key={student.id}>
               <div className="card custom-card mb-5 mx-auto p-3">
                 <div className="card-body">
-                  <h3 className="card-title">{student.prenom} {student.nom}</h3>
+                  <h3 className="card-title">
+                    {student.prenom} {student.nom}
+                  </h3>
                   <p>Matière étudiée : {student.matiere}</p>
                   <button
                     className="btn btn-warning"
@@ -176,7 +240,12 @@ export const Students = () => {
         </div>
 
         {selectedStudent !== null && (
-          <div className="modal fade show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+          <div
+            className="modal fade show"
+            tabIndex="-1"
+            role="dialog"
+            style={{ display: 'block' }}
+          >
             <div className="modal-dialog" role="document">
               <div className="modal-content">
                 <div className="modal-header">
@@ -192,10 +261,18 @@ export const Students = () => {
                   </button>
                 </div>
                 <div className="modal-body">
-                  <p><strong>Prénom:</strong> {selectedStudent.prenom}</p>
-                  <p><strong>Nom:</strong> {selectedStudent.nom}</p>
-                  <p><strong>Email:</strong> {selectedStudent.email}</p>
-                  <p><strong>Téléphone:</strong> {selectedStudent.telephone}</p>
+                  <p>
+                    <strong>Prénom:</strong> {selectedStudent.prenom}
+                  </p>
+                  <p>
+                    <strong>Nom:</strong> {selectedStudent.nom}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {selectedStudent.email}
+                  </p>
+                  <p>
+                    <strong>Téléphone:</strong> {selectedStudent.telephone}
+                  </p>
                 </div>
               </div>
             </div>
@@ -203,7 +280,12 @@ export const Students = () => {
         )}
 
         {isAddingStudent && (
-          <div className="modal fade show" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+          <div
+            className="modal fade show"
+            tabIndex="-1"
+            role="dialog"
+            style={{ display: 'block' }}
+          >
             <div className="modal-dialog" role="document">
               <div className="modal-content">
                 <div className="modal-header">
@@ -231,7 +313,8 @@ export const Students = () => {
                         name="prenom"
                         value={newStudentData.prenom}
                         onChange={handleInputChange}
-                        autoComplete='off'/>
+                        autoComplete="off"
+                      />
                     </div>
                     <div className="mb-3">
                       <label htmlFor="nom" className="form-label">
@@ -244,7 +327,8 @@ export const Students = () => {
                         name="nom"
                         value={newStudentData.nom}
                         onChange={handleInputChange}
-                        autoComplete='off' />
+                        autoComplete="off"
+                      />
                     </div>
                     <div className="mb-3">
                       <label htmlFor="nom" className="form-label">
@@ -257,7 +341,8 @@ export const Students = () => {
                         name="matiere"
                         value={newStudentData.matiere}
                         onChange={handleInputChange}
-                        autoComplete='off'/>
+                        autoComplete="off"
+                      />
                     </div>
                     <div className="mb-3">
                       <label htmlFor="email" className="form-label">
@@ -270,7 +355,8 @@ export const Students = () => {
                         name="email"
                         value={newStudentData.email}
                         onChange={handleInputChange}
-                        autoComplete='off'/>
+                        autoComplete="off"
+                      />
                     </div>
                     <div className="mb-3">
                       <label htmlFor="telephone" className="form-label">
@@ -283,7 +369,8 @@ export const Students = () => {
                         name="telephone"
                         value={newStudentData.telephone}
                         onChange={handleInputChange}
-                        autoComplete='off'/>
+                        autoComplete="off"
+                      />
                     </div>
                     <div className="mb-3">
                       <label htmlFor="mdp" className="form-label">
@@ -296,7 +383,8 @@ export const Students = () => {
                         name="mdp"
                         value={newStudentData.mdp}
                         onChange={handleInputChange}
-                        autoComplete='off' />
+                        autoComplete="off"
+                      />
                     </div>
                     <button type="submit" className="btn btn-primary">
                       Ajouter
@@ -309,6 +397,119 @@ export const Students = () => {
                     className="btn btn-secondary"
                     data-dismiss="modal"
                     onClick={closeAddStudentForm}
+                  >
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isEditing && (
+          <div
+            className="modal fade show"
+            tabIndex="-1"
+            role="dialog"
+            style={{ display: 'block' }}
+          >
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Modifier l'étudiant</h5>
+                  <button
+                    type="button"
+                    className="close"
+                    data-dismiss="modal"
+                    aria-label="Close"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div className="modal-body">
+                  <form onSubmit={handleEditSubmit}>
+                    <div className="mb-3">
+                      <label htmlFor="prenom" className="form-label">
+                        Prénom
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="prenom"
+                        name="prenom"
+                        value={editedStudentData.prenom}
+                        onChange={handleInputChange}
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="nom" className="form-label">
+                        Nom
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="nom"
+                        name="nom"
+                        value={editedStudentData.nom}
+                        onChange={handleInputChange}
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="matiere" className="form-label">
+                        Matière
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="matiere"
+                        name="matiere"
+                        value={editedStudentData.matiere}
+                        onChange={handleInputChange}
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="email" className="form-label">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        id="email"
+                        name="email"
+                        value={editedStudentData.email}
+                        onChange={handleInputChange}
+                        autoComplete="off"
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="telephone" className="form-label">
+                        Téléphone
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="telephone"
+                        name="telephone"
+                        value={editedStudentData.telephone}
+                        onChange={handleInputChange}
+                        autoComplete="off"
+                      />
+                    </div>
+                    <button type="submit" className="btn btn-primary">
+                      Enregistrer
+                    </button>
+                  </form>
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    data-dismiss="modal"
+                    onClick={() => setIsEditing(false)}
                   >
                     Annuler
                   </button>

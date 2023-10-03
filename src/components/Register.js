@@ -69,70 +69,70 @@ export const Register = ({ setIsAuthenticated }) => {
 
   return (
     <div className="container-fluid div-one">
-      <div className="row justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
-        <div className="col-sm-12 col-md-6">
-          <div className="border p-4 rounded shadow-lg" style={{ backgroundColor: 'white' }}>
-            <h2 className="text-center mb-4">Inscription</h2>
-            <form onSubmit={handleRegistration}>
-              <div className="mb-3">
-                <input
-                  type="email"
-                  onChange={handleEmailChange}
-                  className="form-control"
-                  placeholder='Saisissez votre email'
-                  required
-                  autoComplete='off'
-                />
-              </div>
-              <div className="mb-3">
-                <input
-                  type="text"
-                  onChange={handleFullNameChange}
-                  className="form-control"
-                  placeholder='Saisissez votre nom complet'
-                  required
-                  autoComplete='off'
-                />
-              </div>
-              <div className="mb-3">
-                <input
-                  type="number"
-                  onChange={handlePhoneNumberChange}
-                  className="form-control"
-                  placeholder='Saisissez votre numéro de téléphone'
-                  required
-                  autoComplete='off'
-
-                />
-              </div>
-              <div className="mb-3">
-                <input
-                  type="password"
-                  onChange={handlePasswordChange}
-                  className="form-control"
-                  placeholder='Saisissez votre mot de passe'
-                  required
-                  autoComplete='off'
-                />
-              </div>
-              <div className="mb-3">
-                <input
-                  type="password"
-                  onChange={handleConfirmPasswordChange}
-                  className="form-control"
-                  placeholder='Confirmez votre mot de passe'
-                  required
-                  autoComplete='off'
-                />
-              </div>
-              <div className="text-center mb-4">
-                <button className='btn btn-primary'>S'Inscrire</button>
-              </div>
-              <p className="text-center">Vous avez un compte ? <Link to="/login">Connectez-vous</Link></p>
-            </form>
-          </div>
+    <div className="row justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+      <div className="col-sm-12 col-md-6">
+        <div className="border p-4 rounded shadow-lg" style={{ backgroundColor: 'white' }}>
+          <h2 className="text-center mb-4">Inscription</h2>
+          <form onSubmit={handleRegistration} className='form-container'>
+            <div className="mb-3">
+              <input
+                type="email"
+                onChange={handleEmailChange}
+                className="form-control"
+                placeholder='Saisissez votre email'
+                required
+                autoComplete='off'
+              />
+            </div>
+            <div className="mb-3">
+              <input
+                type="text"
+                onChange={handleFullNameChange}
+                className="form-control"
+                placeholder='Saisissez votre nom complet'
+                required
+                autoComplete='off'
+              />
+            </div>
+            <div className="mb-3">
+              <input
+                type="number"
+                onChange={handlePhoneNumberChange}
+                className="form-control"
+                placeholder='Saisissez votre numéro de téléphone'
+                required
+                autoComplete='off'
+              />
+            </div>
+            <div className="mb-3">
+              <input
+                type="password"
+                onChange={handlePasswordChange}
+                className="form-control"
+                placeholder='Saisissez votre mot de passe'
+                required
+                autoComplete='off'
+              />
+            </div>
+            <div className="mb-3">
+              <input
+                type="password"
+                onChange={handleConfirmPasswordChange}
+                className="form-control"
+                placeholder='Confirmez votre mot de passe'
+                required
+                autoComplete='off'
+              />
+            </div>
+            <div className="text-center mb-4">
+              <button className='btn btn-primary btn-lg'>S'Inscrire</button>
+            </div>
+            <p className="text-center">Vous avez un compte ? <Link to="/login">Connectez-vous</Link></p>
+          </form>
         </div>
       </div>
     </div>
+  </div>
+  
   );
 };
