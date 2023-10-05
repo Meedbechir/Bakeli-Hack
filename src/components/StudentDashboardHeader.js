@@ -22,7 +22,7 @@ const StudentDashboardHeader = () => {
     <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top" style={{ width: '100%' }}>
       <div className="container">
         <h2>
-          <Link to="/" style={linkStyle}>Student Dashboard</Link>
+          <Link to="/studentCours" style={linkStyle}>Student Dashboard</Link>
         </h2>
 
         <ul className="navbar-nav ms-auto">

@@ -1,27 +1,72 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { DashboardHeader } from './DashbordHeader';
-import img from '../assets/images/home2.png';
+import { DashCards } from './DashCards'; 
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 
 export const Dashboard = () => {
+  const [numberOfTeachers, setNumberOfTeachers] = useState(0);
+  const [numberOfCourses, setNumberOfCourses] = useState(0);
+  const [numberOfStudents, setNumberOfStudents] = useState(0);
+
+  useEffect(() => {
+   
+    const getNumberOfTeachers = async () => {
+      const db = getFirestore();
+      const teachersCollection = collection(db, 'teachers'); 
+
+      const querySnapshot = await getDocs(teachersCollection);
+      const numberOfTeachers = querySnapshot.size;
+      setNumberOfTeachers(numberOfTeachers);
+    };
+
+    const getNumberOfCourses = async () => {
+      const db = getFirestore();
+      const coursesCollection = collection(db, 'cours'); 
+
+      const querySnapshot = await getDocs(coursesCollection);
+      const numberOfCourses = querySnapshot.size;
+      setNumberOfCourses(numberOfCourses);
+    };
+
+    const getNumberOfStudents = async () => {
+      const db = getFirestore();
+      const usersCollection = collection(db, 'users'); 
+
+      const querySnapshot = await getDocs(usersCollection);
+      let numberOfStudents = 0;
+
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        if (userData.role === 'etudiant') {
+          numberOfStudents++;
+        }
+      });
+
+      setNumberOfStudents(numberOfStudents);
+    };
+
+    getNumberOfTeachers();
+    getNumberOfCourses();
+    getNumberOfStudents();
+  }, []);
+
   return (
     <div>
       <DashboardHeader />
-      
-      <div className="container mt-5">
-        <div className="row">
-          <div className="col-md-6 col-sm-12">
-            {/* Ajoutez ici votre image */}
-            <img src={img} alt="Img" className="img-fluid" />
-          </div>
-          <div className="col-md-6 col-sm-12 mt-4">
-            <p className='fs-4 mt-4'>Bakeli School of Technology est une école de formation professionnelle dans les nouveaux métiers du digital créée par Volkeno.
-            Depuis sa création en 2016, elle a formé plus de 5 000 étudiants et professionnels ! <br /> 
-            Des rentrées ont lieu tous les 3 mois pour permettre à un maximum de personnes souhaitant se former en marketing digital, 
-            en programmation, en design ou encore en entrepreneuriat, d'intégrer l'école.
-            </p>
-          </div>
+    <div className="container-fluid mt-5 pt-5">
+      <div className="row my-3">
+        <div className="col-md-4 mb-3">
+          <DashCards title="Nombre de professeurs" count={numberOfTeachers} />
+        </div>
+        <div className="col-md-4 mb-3">
+          <DashCards title="Nombre de cours" count={numberOfCourses} />
+        </div>
+        <div className="col-md-4 mb-3">
+          <DashCards title="Nombre d'étudiants" count={numberOfStudents} />
         </div>
       </div>
+
+    </div>
     </div>
   );
 };

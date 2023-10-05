@@ -1,5 +1,5 @@
 .div-one {
-  background-color: #3FB5FF;
+  background-color: #1cefff;
   height: 100vh;
 }
 .custom-card {
@@ -48,3 +48,30 @@
   background-color: #f4f4f4;
 }
 
+.custom-input {
+  height: 60px; 
+}
+
+.custom-border {
+  border: 2px solid #fff; 
+  border-radius: 15px; 
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+  padding: 20px;
+}
+
+.div-form {
+  border: 2px solid #fff; 
+  border-radius: 15px; 
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+  padding: 20px;
+}
+
+/* Ajoutez ceci à votre fichier CSS ou au composant CSS-in-JS */
+.modal.fade .modal-dialog {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.modal.fade.show .modal-dialog {
+  opacity: 1;
+}

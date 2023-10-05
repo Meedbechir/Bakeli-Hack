@@ -28,7 +28,7 @@ export const DashboardHeader = () => {
     <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top" style={{ width: '100%' }}>
       <div className="container">
         <h2>
-          <Link to="/" style={linkStyle}>Admin Dashboard</Link>
+          <Link to="/dashboard" style={linkStyle}>Admin Dashboard</Link>
         </h2>
 
         <button

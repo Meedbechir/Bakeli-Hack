@@ -10,6 +10,7 @@ export const Login = ({ setIsAuthenticated }) => {
   const [password, setPassword] = useState('');
   const [resetEmail, setResetEmail] = useState('');
   const [showResetModal, setShowResetModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -29,6 +30,7 @@ export const Login = ({ setIsAuthenticated }) => {
     e.preventDefault();
 
     try {
+      setIsLoading(true); 
       await signInWithEmailAndPassword(auth, email, password);
 
       const usersCollection = collection(db, 'users');
@@ -52,6 +54,8 @@ export const Login = ({ setIsAuthenticated }) => {
     } catch (error) {
       alert('Échec de la connexion. Veuillez vérifier vos informations.');
       console.error(error);
+    } finally {
+      setIsLoading(false); 
     }
   };
 
@@ -59,6 +63,7 @@ export const Login = ({ setIsAuthenticated }) => {
     e.preventDefault();
 
     try {
+
       await sendPasswordResetEmail(auth, resetEmail);
       alert('Un e-mail de réinitialisation de mot de passe a été envoyé à votre adresse e-mail.');
       setResetEmail('');
@@ -66,99 +71,112 @@ export const Login = ({ setIsAuthenticated }) => {
     } catch (error) {
       alert('Échec de l\'envoi de l\'e-mail de réinitialisation de mot de passe. Veuillez vérifier votre adresse e-mail.');
       console.error(error);
+    } finally {
     }
   };
 
   return (
     <div className="container-fluid div-one">
-      <div className="row align-items-center justify-content-center" style={{ minHeight: '80vh' }}>
+      <div className="row align-items-center justify-content-center" style={{ minHeight: '90vh' }}>
         <div className="col-12 col-md-8 col-lg-6">
-          <div className="border p-4 div-form" style={{ backgroundColor: 'white' }}>
+          <div className="p-4 div-form" style={{ backgroundColor: 'white' }}>
             <h2 className="text-center">Connexion</h2>
-            <form onSubmit={handleLogin}>
-              <div className="form-group mb-3">
-                <input
-                  type="email"
-                  className="form-control"
-                  placeholder="Email"
-                  onChange={handleEmailChange}
-                  value={email}
-                  required
-                />
+
+            {isLoading ? (
+             
+              <div className="text-center">
+                <p>Connexion en cours...</p>
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Chargement...</span>
+                </div>
               </div>
-              <div className="form-group mb-3">
-                <input
-                  type="password"
-                  className="form-control"
-                  placeholder="Mot de Passe"
-                  onChange={handlePasswordChange}
-                  value={password}
-                  required
-                />
+            ) : (
+             
+              <form onSubmit={handleLogin}>
+                <div className="form-group mb-4">
+                  <input
+                    type="email"
+                    className="form-control custom-input"
+                    placeholder="Email"
+                    onChange={handleEmailChange}
+                    value={email}
+                    required
+                  />
+                </div>
+                <div className="form-group mb-4">
+                  <input
+                    type="password"
+                    className="form-control custom-input"
+                    placeholder="Mot de Passe"
+                    onChange={handlePasswordChange}
+                    value={password}
+                    required
+                  />
+                </div>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                  <button className="btn btn-primary btn-block">Se Connecter</button>
+                  <button
+                    className="btn btn-danger btn-block mt-2"
+                    onClick={() => setShowResetModal(true)}
+                  >
+                    Mot de passe oublié ?
+                  </button>
+                </div>
+                <p className="text-center">
+                  Vous n'avez pas de compte ? <Link to="/register">Inscrivez-vous</Link>
+                </p>
+              </form>
+            )}
+
+            {showResetModal && (
+              <div className="modal" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
+                <div className="modal-dialog" role="document">
+                  <div className="modal-content">
+                    <div className="modal-header">
+                      <h5 className="modal-title">Réinitialiser le Mot de Passe</h5>
+                      <button
+                        type="button"
+                        className="close"
+                        data-dismiss="modal"
+                        aria-label="Close"
+                        onClick={() => setShowResetModal(false)}
+                      >
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div className="modal-body">
+                      <form onSubmit={handleResetPassword}>
+                        <div className="form-group">
+                          <label htmlFor="resetEmail">Adresse E-mail</label>
+                          <input
+                            type="email"
+                            className="form-control custom-input"
+                            id="resetEmail"
+                            placeholder="Saisissez votre adresse e-mail"
+                            onChange={handleResetEmailChange}
+                            value={resetEmail}
+                            required
+                          />
+                        </div>
+                        <div className="modal-footer">
+                          <button type="submit" className="btn btn-primary">Envoyer</button>
+                          <button
+                            type="button"
+                            className="btn btn-secondary"
+                            onClick={() => setShowResetModal(false)}
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="d-flex justify-content-between align-items-center mb-3">
-                <button className="btn btn-primary btn-block">Se Connecter</button>
-                <button
-                  className="btn btn-danger btn-block mt-2"
-                  onClick={() => setShowResetModal(true)}
-                >
-                  Mot de passe oublié ?
-                </button>
-              </div>
-              <p className="text-center">
-                Vous n'avez pas de compte ? <Link to="/register">Inscrivez-vous</Link>
-              </p>
-            </form>
+            )}
           </div>
         </div>
       </div>
-
-      {showResetModal && (
-        <div className="modal" tabIndex="-1" role="dialog" style={{ display: 'block' }}>
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Réinitialiser le Mot de Passe</h5>
-                <button
-                  type="button"
-                  className="close"
-                  data-dismiss="modal"
-                  aria-label="Close"
-                  onClick={() => setShowResetModal(false)}
-                >
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <form onSubmit={handleResetPassword}>
-                  <div className="form-group">
-                    <label htmlFor="resetEmail">Adresse E-mail</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="resetEmail"
-                      placeholder="Saisissez votre adresse e-mail"
-                      onChange={handleResetEmailChange}
-                      value={resetEmail}
-                      required
-                    />
-                  </div>
-                  <div className="modal-footer">
-                    <button type="submit" className="btn btn-primary">Envoyer</button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => setShowResetModal(false)}
-                    >
-                      Annuler
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

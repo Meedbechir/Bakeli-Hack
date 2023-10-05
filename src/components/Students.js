@@ -5,6 +5,7 @@ import { collection, addDoc, getDocs, where, query, doc, updateDoc } from 'fireb
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
 
+
 export const Students = () => {
   const [students, setStudents] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -19,7 +20,7 @@ export const Students = () => {
     role: 'etudiant',
   });
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); 
   const [editedStudentData, setEditedStudentData] = useState({
     prenom: '',
     nom: '',
@@ -34,7 +35,7 @@ export const Students = () => {
   const openEditStudentModal = (studentId) => {
     setEditingStudentId(studentId);
 
-    // Pré-remplissez les champs avec les données de l'étudiant sélectionné si nécessaire.
+    
     const student = students.find((s) => s.id === studentId);
     if (student) {
       setEditedStudentData({
@@ -43,7 +44,6 @@ export const Students = () => {
         matiere: student.matiere,
         email: student.email,
         telephone: student.telephone,
-        mdp: '', // Vous pouvez choisir de vider le champ du mot de passe ou non ici
       });
     }
 
@@ -137,17 +137,15 @@ export const Students = () => {
 
     try {
       if (editingStudentId) {
-        // Mettez à jour les données de l'étudiant dans Firestore
         const studentRef = doc(db, 'users', editingStudentId);
         await updateDoc(studentRef, editedStudentData);
 
-        // Mettez à jour l'état local de l'étudiant
         const updatedStudents = students.map((student) =>
           student.id === editingStudentId ? { ...student, ...editedStudentData } : student
         );
 
         setStudents(updatedStudents);
-        setIsEditing(false); // Fermez le modal de modification
+        setIsEditing(false); 
       }
     } catch (error) {
       console.error(error);
@@ -179,6 +177,15 @@ export const Students = () => {
     }
   };
 
+  const handleNewStudentInputChange = (e) => {
+  const { name, value } = e.target;
+  setNewStudentData({
+    ...newStudentData,
+    [name]: value,
+  });
+};
+
+
   return (
     <div>
       <DashboardHeader />
@@ -206,11 +213,11 @@ export const Students = () => {
                     Archiver
                   </button>
                   <button
-        className="btn btn-success ms-3" // Ajoutez ici la classe pour le bouton Modifier
-        onClick={() => openEditStudentModal(student.id)} // Ouvrir le modal de modification
-      >
-        Modifier
-      </button>
+                   className="btn btn-success ms-3" 
+                   onClick={() => openEditStudentModal(student.id)} 
+                   >
+                     Modifier
+                 </button>
                 </div>
               </div>
             </div>
@@ -279,132 +286,154 @@ export const Students = () => {
           </div>
         )}
 
-        {isAddingStudent && (
-          <div
-            className="modal fade show"
-            tabIndex="-1"
-            role="dialog"
-            style={{ display: 'block' }}
+
+
+{isAddingStudent && (
+  <div
+    className="modal fade show"
+    tabIndex="-1"
+    role="dialog"
+    style={{ display: 'block' }}
+  >
+    <div className="modal-dialog" role="document">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Ajouter un étudiant</h5>
+          <button
+            type="button"
+            className="close"
+            data-dismiss="modal"
+            aria-label="Close"
+            onClick={closeAddStudentForm}
           >
-            <div className="modal-dialog" role="document">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Ajouter un étudiant</h5>
-                  <button
-                    type="button"
-                    className="close"
-                    data-dismiss="modal"
-                    aria-label="Close"
-                    onClick={closeAddStudentForm}
-                  >
-                    <span aria-hidden="true">&times;</span>
-                  </button>
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div className="modal-body">
+          <form onSubmit={handleSubmit}>
+            <div className="row">
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label htmlFor="prenom" className="form-label">
+                    Prénom
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="prenom"
+                    name="prenom"
+                   value={newStudentData.prenom}
+                  onChange={handleNewStudentInputChange}
+                    autoComplete="off"
+                    required
+                  />
                 </div>
-                <div className="modal-body">
-                  <form onSubmit={handleSubmit}>
-                    <div className="mb-3">
-                      <label htmlFor="prenom" className="form-label">
-                        Prénom
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="prenom"
-                        name="prenom"
-                        value={newStudentData.prenom}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="nom" className="form-label">
-                        Nom
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="nom"
-                        name="nom"
-                        value={newStudentData.nom}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="nom" className="form-label">
-                        Matière
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="matiere"
-                        name="matiere"
-                        value={newStudentData.matiere}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="email" className="form-label">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        id="email"
-                        name="email"
-                        value={newStudentData.email}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="telephone" className="form-label">
-                        Téléphone
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="telephone"
-                        name="telephone"
-                        value={newStudentData.telephone}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="mdp" className="form-label">
-                        Mot de passe
-                      </label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        id="mdp"
-                        name="mdp"
-                        value={newStudentData.mdp}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <button type="submit" className="btn btn-primary">
-                      Ajouter
-                    </button>
-                  </form>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label htmlFor="nom" className="form-label">
+                    Nom
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="nom"
+                    name="nom"
+                    value={newStudentData.nom}
+                    onChange={handleNewStudentInputChange}
+                    autoComplete="off"
+                    required
+                  />
                 </div>
-                <div className="modal-footer">
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    data-dismiss="modal"
-                    onClick={closeAddStudentForm}
-                  >
-                    Annuler
-                  </button>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label htmlFor="matiere" className="form-label">
+                    Matière
+                  </label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="matiere"
+                    name="matiere"
+                    value={newStudentData.matiere}
+                    onChange={handleNewStudentInputChange}
+                    autoComplete="off"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label htmlFor="email" className="form-label">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    id="email"
+                    name="email"
+                    value={newStudentData.email}
+                    onChange={handleNewStudentInputChange}
+                    autoComplete="off"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label htmlFor="telephone" className="form-label">
+                    Téléphone
+                  </label>
+                  <input
+                    type="number"
+                    className="form-control"
+                    id="telephone"
+                    name="telephone"
+                    value={newStudentData.telephone}
+                    onChange={handleNewStudentInputChange}
+                    autoComplete="off"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="col-md-6">
+                <div className="mb-3">
+                  <label htmlFor="mdp" className="form-label">
+                    Mot de passe
+                  </label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="mdp"
+                    name="mdp"
+                    value={newStudentData.mdp}
+                    onChange={handleNewStudentInputChange}
+                    autoComplete="off"
+                    required
+                  />
                 </div>
               </div>
             </div>
-          </div>
-        )}
+            <button type="submit" className="btn btn-primary">
+              Ajouter
+            </button>
+          </form>
+        </div>
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            data-dismiss="modal"
+            onClick={closeAddStudentForm}
+          >
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
 
         {isEditing && (
           <div
@@ -428,81 +457,94 @@ export const Students = () => {
                   </button>
                 </div>
                 <div className="modal-body">
-                  <form onSubmit={handleEditSubmit}>
-                    <div className="mb-3">
-                      <label htmlFor="prenom" className="form-label">
-                        Prénom
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="prenom"
-                        name="prenom"
-                        value={editedStudentData.prenom}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="nom" className="form-label">
-                        Nom
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="nom"
-                        name="nom"
-                        value={editedStudentData.nom}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="matiere" className="form-label">
-                        Matière
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="matiere"
-                        name="matiere"
-                        value={editedStudentData.matiere}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="email" className="form-label">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        id="email"
-                        name="email"
-                        value={editedStudentData.email}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="telephone" className="form-label">
-                        Téléphone
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="telephone"
-                        name="telephone"
-                        value={editedStudentData.telephone}
-                        onChange={handleInputChange}
-                        autoComplete="off"
-                      />
+                <form onSubmit={handleEditSubmit}>
+                    <div className="row">
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label htmlFor="prenom" className="form-label">
+                            Prénom
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="prenom"
+                            name="prenom"
+                            value={editedStudentData.prenom}
+                            onChange={handleInputChange}
+                            autoComplete="off"
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label htmlFor="nom" className="form-label">
+                            Nom
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="nom"
+                            name="nom"
+                            value={editedStudentData.nom}
+                            onChange={handleInputChange}
+                            autoComplete="off"
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label htmlFor="matiere" className="form-label">
+                            Matière
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="matiere"
+                            name="matiere"
+                            value={editedStudentData.matiere}
+                            onChange={handleInputChange}
+                            autoComplete="off"
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label htmlFor="email" className="form-label">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            className="form-control"
+                            id="email"
+                            name="email"
+                            value={editedStudentData.email}
+                            onChange={handleInputChange}
+                            autoComplete="off"
+                          />
+                        </div>
+                      </div>
+                      <div className="col-md-6">
+                        <div className="mb-3">
+                          <label htmlFor="telephone" className="form-label">
+                            Téléphone
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            id="telephone"
+                            name="telephone"
+                            value={editedStudentData.telephone}
+                            onChange={handleInputChange}
+                            autoComplete="off"
+                          />
+                        </div>
+                      </div>
                     </div>
                     <button type="submit" className="btn btn-primary">
                       Enregistrer
                     </button>
-                  </form>
+                 </form>
+
                 </div>
                 <div className="modal-footer">
                   <button
