@@ -66,7 +66,6 @@
   padding: 20px;
 }
 
-/* Ajoutez ceci à votre fichier CSS ou au composant CSS-in-JS */
 .modal.fade .modal-dialog {
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
@@ -76,34 +75,30 @@
   opacity: 1;
 }
 
-/* Styles pour la liste d'événements */
 .event-list {
   list-style: none;
   padding: 0;
 }
 
-/* Styles pour chaque élément d'événement */
 .event-item {
-  margin-bottom: 20px; /* Ajoute de l'espace entre chaque événement */
+  margin-bottom: 20px;
   padding: 20px;
-  background-color: #f5f5f5; /* Couleur de fond de l'événement */
-  border: 1px solid #ddd; /* Bordure de l'événement */
-  border-radius: 8px; /* Coins arrondis */
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 8px;
 }
 
-/* Styles pour les titres des événements */
 .event-title {
-  font-size: 24px; /* Ajuste la taille des titres */
-  font-weight: bold; /* Met en gras les titres */
+  font-size: 24px; 
+  font-weight: bold;
 }
 
-/* Styles pour les icônes d'événement */
 .event-icon {
-  color: #007bff; /* Couleur de remplissage des icônes */
-  margin-right: 10px; /* Ajoute un espace entre l'icône et le texte */
+  color: #007bff;
+  margin-right: 10px;
 }
 
-/* Autres styles personnalisés */
 h1 {
-  margin-top: 50px; /* Ajoute de l'espace en haut du titre "Les Événements à Venir" */
+  margin-top: 50px; 
 }
+

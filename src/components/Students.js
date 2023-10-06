@@ -569,6 +569,7 @@ export const Students = () => {
             Ajouter un étudiant
           </button>
         </div>
+
       </div>
     </div>
   );
